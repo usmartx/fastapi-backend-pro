@@ -1,35 +1,24 @@
+# app/core/auth.py
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from typing import Optional
+import jwt
 
-# Secret key pour JWT (à mettre en .env en prod)
-SECRET_KEY = "ton_secret_key_super_secure"  
+SECRET_KEY = "supersecretkey123"  # change pour un secret fort en prod
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Gestion des mots de passe hashés
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Hash mot de passe
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-# Vérifier mot de passe
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-# Créer token
-def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MINUTES):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=expires_delta)
+    expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# Décoder token
 def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
-    except JWTError:
-        return None
+    except jwt.ExpiredSignatureError:
+        raise Exception("Token expired")
+    except jwt.PyJWTError:
+        raise Exception("Invalid token")

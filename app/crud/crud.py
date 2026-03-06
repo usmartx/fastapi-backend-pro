@@ -13,16 +13,21 @@ def create_user(user: UserCreate):
     return {"message": f"Utilisateur {user.name} ajouté avec succès"}
 
 def get_users(page: int = 1, limit: int = 10):
-    offset = (page - 1) * limit
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, age FROM users LIMIT ? OFFSET ?", (limit, offset))
+    offset = (page - 1) * limit
+    cursor.execute(
+        "SELECT id, name, age FROM users LIMIT ? OFFSET ?",
+        (limit, offset)
+    )
     users = cursor.fetchall()
     conn.close()
+    
+    # Formater en dictionnaire pour FastAPI
     return {
         "page": page,
         "limit": limit,
-        "total_users": 1000,
+        "total_users": 1000,  # à remplacer par un COUNT réel si tu veux
         "data": [{"id": u[0], "name": u[1], "age": u[2]} for u in users]
     }
 
