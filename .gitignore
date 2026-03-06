@@ -1,19 +1,9 @@
-# Python cache
-__pycache__/
+# Python
 *.pyc
-*.pyo
-*.pyd
+__pycache__/
 
-# Virtual environment
+# SQLite
+*.db
+
+# Virtual env
 venv/
-ENV/
-env/
-
-# Local database
-users.db
-
-# VSCode settings
-.vscode/
-
-# macOS system files
-.DS_Store
